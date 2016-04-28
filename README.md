@@ -78,6 +78,13 @@ You can load your own commands by implementing the \PhpSlackBot\Command\BaseComm
 
 Then call PhpSlackBot\Bot::loadCommand method for each command you have to load.
 
+By default the internal commands ()listed above in the Example commands section) are loaded.
+If you want to dismiss the load you can pass `false` as a first argument of the method `run()` like this:
+
+```php
+$bot->run(false);
+```
+
 ## "Catch All" command
 
 If you need to execute a command when an event occurs, you can set up a "catch all" command.
@@ -136,3 +143,12 @@ Then, use the parameter "name" to trigger the corresponding webhook :
 ```
 curl -X POST --data-urlencode 'auth=secret' --data-urlencode 'name=output' --data-urlencode 'payload={"type" : "message", "text": "This is a message", "channel": "#general"}' http://localhost:8080
 ```
+
+By default the internal webhooks are loaded.
+If you want to dismiss the load you can pass `false` as a second argument of the method `run()` like this:
+
+```php
+$bot->run(true, false);
+```
+
+*Note: The first argument allows you to dismiss the load of the internal commands (`true` by default).*

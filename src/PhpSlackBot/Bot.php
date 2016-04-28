@@ -48,11 +48,13 @@ class Bot {
         $this->authentificationToken = $authentificationToken;
     }
 
-    public function run() {
+    public function run($loadInternalCommands = true, $loadInternalWebhooks = true) {
         if (!isset($this->params['token'])) {
             throw new \Exception('A token must be set. Please see https://my.slack.com/services/new/bot');
         }
-        $this->loadInternalCommands();
+        if ($loadInternalCommands) {
+            $this->loadInternalCommands();
+        }
         $this->init();
         $logger = new \Zend\Log\Logger();
         $writer = new \Zend\Log\Writer\Stream("php://output");
@@ -101,7 +103,9 @@ class Bot {
 
         /* Webserver */
         if (null !== $this->webserverPort) {
-            $this->loadInternalWebhooks();
+            if ($loadInternalWebhooks) {
+                $this->loadInternalWebhooks();
+            }
             $logger->notice("Listening on port ".$this->webserverPort);
             $socket = new \React\Socket\Server($loop);
             $http = new \React\Http\Server($socket);
