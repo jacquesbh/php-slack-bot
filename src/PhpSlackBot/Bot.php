@@ -113,7 +113,25 @@ class Bot {
             $socket = new \React\Socket\Server($loop);
             $http = new \React\Http\Server($socket);
             $http->on('request', function ($request, $response) use ($client) {
-                $post = $request->getQuery() + $request->getPost();
+
+                // Path vars
+                $path = trim($request->getPath(), '/');
+                $pathVars = [];
+                if (!empty($path)) {
+                    $pathParts = array_chunk(explode('/', $path), 2);
+                    if (count($pathParts)) {
+                        foreach ($pathParts as $part) {
+                            if (count($part) < 2) {
+                                $pathVars[$part[0]] = null;
+                            } else {
+                                $pathVars[$part[0]] = $part[1];
+                            }
+                        }
+                    }
+                }
+                
+                $post = $pathVars + $request->getPost();
+
                 if ($this->authentificationToken === null || ($this->authentificationToken !== null &&
                                                               isset($post['auth']) &&
                                                               $post['auth'] === $this->authentificationToken)) {
