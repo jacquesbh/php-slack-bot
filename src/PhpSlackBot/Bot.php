@@ -9,6 +9,7 @@ class Bot {
     private $commands = array();
     private $webhooks = array();
     private $webserverPort = null;
+    private $webserverHost = null;
     private $webserverAuthentificationToken = null;
     private $catchAllCommand = null;
 
@@ -43,8 +44,9 @@ class Bot {
         }
     }
 
-    public function enableWebserver($port, $authentificationToken = null) {
+    public function enableWebserver($port, $authentificationToken = null, $webserverHost = '127.0.0.1') {
         $this->webserverPort = $port;
+        $this->webserverHost = $webserverHost;
         $this->authentificationToken = $authentificationToken;
     }
 
@@ -133,7 +135,7 @@ class Bot {
                     $response->end("");
                 }
             });
-            $socket->listen($this->webserverPort);
+            $socket->listen($this->webserverPort, $this->webserverHost);
         }
 
         $loop->run();
