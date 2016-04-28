@@ -194,7 +194,7 @@ class Bot {
             $args = array_values(array_filter(explode(' ', $data['text'])));
             if (isset($args[$argsOffset])) {
                 foreach ($this->commands as $commandName => $availableCommand) {
-                    if ($args[$argsOffset] == $commandName) {
+                    if (strtolower($args[$argsOffset]) == strtolower($commandName)) {
                         return $this->commands[$commandName];
                     }
                 }
