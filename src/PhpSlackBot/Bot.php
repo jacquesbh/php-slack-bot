@@ -79,10 +79,10 @@ class Bot {
 
         $client->on("message", function($message) use ($client, $logger){
             $data = $message->getData();
+
             $logger->notice("Got message: ".$data);
             $data = json_decode($data, true);
 
-            $catched = false;
             $command = $this->getCommand($data);
             if ($command instanceof Command\BaseCommand) {
                 $command->setClient($client);
@@ -90,10 +90,9 @@ class Bot {
                 $command->setUser($data['user']);
                 $command->setContext($this->context);
                 $command->executeCommand($data, $this->context);
-                $catched = true;
             }
 
-            if (!$catched && null !== $this->catchAllCommand) {
+            if (null !== $this->catchAllCommand) {
                 $command = $this->catchAllCommand;
                 $command->setClient($client);
                 $command->setContext($this->context);
@@ -129,7 +128,7 @@ class Bot {
                         }
                     }
                 }
-                
+
                 $post = $pathVars + $request->getPost();
 
                 if ($this->authentificationToken === null || ($this->authentificationToken !== null &&
