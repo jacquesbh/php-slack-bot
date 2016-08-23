@@ -129,7 +129,7 @@ class Bot {
                     }
                 }
 
-                $post = $pathVars + $request->getPost();
+                $post = $pathVars + $_POST; // I know it's bad… but it works fine now.
 
                 if ($this->authentificationToken === null || ($this->authentificationToken !== null &&
                                                               isset($post['auth']) &&
