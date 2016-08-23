@@ -112,45 +112,48 @@ class Bot {
             $socket = new \React\Socket\Server($loop);
             $http = new \React\Http\Server($socket);
             $http->on('request', function ($request, $response) use ($client) {
+                $request->on('data', function ($data) use ($request, $response, $client) {
 
-                // Path vars
-                $path = trim($request->getPath(), '/');
-                $pathVars = [];
-                if (!empty($path)) {
-                    $pathParts = array_chunk(explode('/', $path), 2);
-                    if (count($pathParts)) {
-                        foreach ($pathParts as $part) {
-                            if (count($part) < 2) {
-                                $pathVars[$part[0]] = null;
-                            } else {
-                                $pathVars[$part[0]] = $part[1];
+                    // Path vars
+                    $path = trim($request->getPath(), '/');
+                    $pathVars = [];
+                    if (!empty($path)) {
+                        $pathParts = array_chunk(explode('/', $path), 2);
+                        if (count($pathParts)) {
+                            foreach ($pathParts as $part) {
+                                if (count($part) < 2) {
+                                    $pathVars[$part[0]] = null;
+                                } else {
+                                    $pathVars[$part[0]] = $part[1];
+                                }
                             }
                         }
                     }
-                }
 
-                $post = $pathVars + $_POST; // I know it's bad… but it works fine now.
+                    parse_str($data, $dataVars);
+                    $post = $pathVars + $dataVars; // I know it's bad… but it works fine now.
 
-                if ($this->authentificationToken === null || ($this->authentificationToken !== null &&
-                                                              isset($post['auth']) &&
-                                                              $post['auth'] === $this->authentificationToken)) {
-                    if (isset($post['name']) && is_string($post['name']) && isset($this->webhooks[$post['name']])) {
-                        $hook = $this->webhooks[$post['name']];
-                        $hook->setClient($client);
-                        $hook->setContext($this->context);
-                        $hook->executeWebhook(json_decode($post['payload'], true), $this->context);
-                        $response->writeHead(200, array('Content-Type' => 'text/plain'));
-                        $response->end("Ok\n");
+                    if ($this->authentificationToken === null || ($this->authentificationToken !== null &&
+                                                                  isset($post['auth']) &&
+                                                                  $post['auth'] === $this->authentificationToken)) {
+                        if (isset($post['name']) && is_string($post['name']) && isset($this->webhooks[$post['name']])) {
+                            $hook = $this->webhooks[$post['name']];
+                            $hook->setClient($client);
+                            $hook->setContext($this->context);
+                            $hook->executeWebhook(json_decode($post['payload'], true), $this->context);
+                            $response->writeHead(200, array('Content-Type' => 'text/plain'));
+                            $response->end("Ok\n");
+                        }
+                        else {
+                            $response->writeHead(404, array('Content-Type' => 'text/plain'));
+                            $response->end("No webhook found\n");
+                        }
                     }
                     else {
-                        $response->writeHead(404, array('Content-Type' => 'text/plain'));
-                        $response->end("No webhook found\n");
+                        $response->writeHead(403, array('Content-Type' => 'text/plain'));
+                        $response->end("");
                     }
-                }
-                else {
-                    $response->writeHead(403, array('Content-Type' => 'text/plain'));
-                    $response->end("");
-                }
+                });
             });
             $socket->listen($this->webserverPort, $this->webserverHost);
         }
