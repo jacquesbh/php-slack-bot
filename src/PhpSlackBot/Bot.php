@@ -136,7 +136,7 @@ class Bot {
                     if ($this->authentificationToken === null || ($this->authentificationToken !== null &&
                                                                   isset($post['auth']) &&
                                                                   $post['auth'] === $this->authentificationToken)) {
-                        if (isset($post['name']) && is_string($post['name']) && isset($this->webhooks[$post['name']])) {
+                        if (isset($post['name']) && is_string($post['name']) && isset($this->webhooks[$post['name']]) && isset($post['payload'])) {
                             $hook = $this->webhooks[$post['name']];
                             $hook->setClient($client);
                             $hook->setContext($this->context);
