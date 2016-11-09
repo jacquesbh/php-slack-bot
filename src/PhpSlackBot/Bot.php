@@ -146,7 +146,7 @@ class Bot {
                         }
                         else {
                             $response->writeHead(404, array('Content-Type' => 'text/plain'));
-                            $response->end("No webhook found\n");
+                            $response->end("");
                         }
                     }
                     else {
