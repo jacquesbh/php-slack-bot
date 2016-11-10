@@ -145,12 +145,12 @@ class Bot {
                             $response->end("Ok\n");
                         }
                         else {
-                            $response->writeHead(404, array('Content-Type' => 'text/plain'));
+                            //$response->writeHead(404, array('Content-Type' => 'text/plain'));
                             $response->end("");
                         }
                     }
                     else {
-                        $response->writeHead(403, array('Content-Type' => 'text/plain'));
+                        //$response->writeHead(403, array('Content-Type' => 'text/plain'));
                         $response->end("");
                     }
                 });
