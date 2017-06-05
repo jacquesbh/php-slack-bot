@@ -1,6 +1,8 @@
 <?php
 namespace PhpSlackBot;
 
+use React\Http\Response;
+
 class Bot {
 
     private $params = array();
@@ -140,9 +142,14 @@ class Bot {
                             $hook = $this->webhooks[$post['name']];
                             $hook->setClient($client);
                             $hook->setContext($this->context);
-                            $hook->executeWebhook(json_decode($post['payload'], true), $this->context);
-                            $response->writeHead(200, array('Content-Type' => 'text/plain'));
-                            $response->end("Ok\n");
+                            $hook->setResponse($response);
+                            $alternativeResponse = $hook->executeWebhook(json_decode($post['payload'], true), $this->context);
+                            if ($alternativeResponse instanceof Response) {
+                                $alternativeResponse->end();
+                            } else {
+                                $response->writeHead(200, ['Content-Type' => 'text/plain']);
+                                $response->end("Ok\n");
+                            }
                         }
                         else {
                             //$response->writeHead(404, array('Content-Type' => 'text/plain'));
