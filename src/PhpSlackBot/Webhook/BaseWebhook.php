@@ -2,6 +2,7 @@
 namespace PhpSlackBot\Webhook;
 
 use React\Http\Response;
+use React\Http\Request;
 
 abstract class BaseWebhook extends \PhpSlackBot\Base {
 
@@ -9,6 +10,16 @@ abstract class BaseWebhook extends \PhpSlackBot\Base {
      * @var Response
      */
     private $response;
+
+    /**
+     * @var Request
+     */
+    private $request;
+
+    /**
+     * @var string
+     */
+    private $body;
 
     /**
      * @param $payload
@@ -41,6 +52,38 @@ abstract class BaseWebhook extends \PhpSlackBot\Base {
     public function getResponse()
     {
         return $this->response;
+    }
+
+    /**
+     * @return string
+     */
+    public function getBody()
+    {
+        return $this->body;
+    }
+
+    /**
+     * @param string $body
+     */
+    public function setBody($body)
+    {
+        $this->body = $body;
+    }
+
+    /**
+     * @return Request
+     */
+    public function getRequest()
+    {
+        return $this->request;
+    }
+
+    /**
+     * @param Request $request
+     */
+    public function setRequest($request)
+    {
+        $this->request = $request;
     }
 
 }

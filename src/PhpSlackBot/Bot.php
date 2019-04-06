@@ -113,8 +113,11 @@ class Bot {
             $logger->notice("Listening on port ".$this->webserverPort);
             $socket = new \React\Socket\Server($loop);
             $http = new \React\Http\Server($socket);
-            $http->on('request', function ($request, $response) use ($client) {
-                $request->on('data', function ($data) use ($request, $response, $client) {
+
+            $buffers = [];
+
+            $http->on('request', function ($request, $response) use ($client, &$buffers) {
+                $request->on('data', function ($data) use ($request, $response, $client, &$buffers) {
 
                     // Path vars
                     $path = trim($request->getPath(), '/');
@@ -132,8 +135,28 @@ class Bot {
                         }
                     }
 
-                    parse_str($data, $dataVars);
-                    $post = $pathVars + $dataVars; // I know it's bad… but it works fine now.
+                    $headers = $request->getHeaders();
+                    if (isset($headers['X-GitHub-Delivery'])) {
+                        $dataId = $headers['X-GitHub-Delivery'];
+                        if (null === json_decode($data)) {
+                            if (!isset($buffers[$dataId])) {
+                                $buffers[$dataId] = $data;
+                            }
+                            else {
+                                $buffers[$dataId] .= $data;
+                            }
+                            if (null === json_decode($buffers[$dataId])) {
+                                return;
+                            } else {
+                                $data = $buffers[$dataId];
+                                unset($buffers[$dataId]);
+                            }
+                        }
+                        $post = $pathVars + ['payload' => $data];
+                    } else {
+                        parse_str($data, $dataVars);
+                        $post = $pathVars + $dataVars;
+                    }
 
                     if ($this->authentificationToken === null || ($this->authentificationToken !== null &&
                                                                   isset($post['auth']) &&
@@ -143,6 +166,7 @@ class Bot {
                             $hook->setClient($client);
                             $hook->setContext($this->context);
                             $hook->setResponse($response);
+                            $hook->setRequest($request);
                             $alternativeResponse = $hook->executeWebhook(json_decode($post['payload'], true), $this->context);
                             if ($alternativeResponse instanceof Response) {
                                 $alternativeResponse->end();
