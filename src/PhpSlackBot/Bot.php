@@ -15,6 +15,16 @@ class Bot {
     private $webserverAuthentificationToken = null;
     private $catchAllCommand = null;
 
+    /**
+     * @var \Devristo\Phpws\Client\WebSocket
+     */
+    private $client;
+
+    /**
+     * @var \React\Socket\Server
+     */
+    private $socker;
+
     public function setToken($token) {
         $this->params = array('token' => $token);
     }
@@ -66,6 +76,7 @@ class Bot {
 
         $loop = \React\EventLoop\Factory::create();
         $client = new \Devristo\Phpws\Client\WebSocket($this->wsUrl, $loop, $logger);
+        $this->client = $client;
 
         $client->on("request", function($headers) use ($logger){
                 $logger->notice("Request object created!");
@@ -112,6 +123,7 @@ class Bot {
             }
             $logger->notice("Listening on port ".$this->webserverPort);
             $socket = new \React\Socket\Server($loop);
+            $this->socket = $socket;
             $http = new \React\Http\Server($socket);
 
             $buffers = [];
@@ -254,6 +266,18 @@ class Bot {
             }
         }
         return null;
+    }
+
+    public function shutdown()
+    {
+        if ($this->client !== null) {
+            $this->client->close();
+            $this->client = null;
+        }
+        if ($this->socket !== null) {
+            $this->socket->shutdown();
+            $this->socket = null;
+        }
     }
 
 }
